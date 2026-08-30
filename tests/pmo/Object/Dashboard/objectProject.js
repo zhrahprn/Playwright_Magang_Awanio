@@ -1,25 +1,19 @@
 import { expect } from '@playwright/test';
 import locatorProject from '../../Locator/Dashboard/locatorProject.js';
 
-export class ProjectPage {
+export default class ProjectPage {
   constructor(page) {
     this.page = page;
-    this.tenancyMenu = page.locator(locatorProject.tenancyMenu);
+    this.tenancyMenu = page.getByTestId(locatorProject.tenancyMenu);
     this.projectMenu = page.getByTestId(locatorProject.projectMenu);
-    this.createProjectBtn = page.locator(locatorProject.createProjectBtn);
+    this.createProjectBtn = page.getByTestId(locatorProject.createProjectBtn);
+    this.createFormSubmitBtn = page.getByTestId(locatorProject.createFormSubmitBtn);
     this.moreActionTrigger = page.getByTestId(locatorProject.moreActionTrigger);
-    this.viewUpdateLink = page.locator(locatorProject.viewUpdateLink);
-
-    this.actionMenu = page.getByRole('dialog').filter({ hasText: /Update|Remove/i });
-
-    this.updateModal = page.getByRole('dialog').filter({ hasText: /Update/i });
-    this.projectNameInput = this.updateModal.getByRole('textbox');
-    this.submitBtn = this.updateModal.getByRole('button', { name: 'Update', exact: true });
-
-    this.removeOption = page.locator(locatorProject.removeOption);
-
-    this.deleteModal = page.getByRole('dialog').filter({ hasText: /remove|delete/i });
-    this.deleteConfirmInput = this.deleteModal.getByRole('textbox'); // Ambil input textbox dalam modal delete
+    this.viewUpdateLink = page.getByTestId(locatorProject.viewUpdateLink);
+    this.removeOption = page.getByTestId(locatorProject.removeOption);
+    this.projectNameInput = page.getByTestId(locatorProject.projectNameInput);
+    this.deleteModal = page.getByRole('dialog');
+    this.deleteConfirmInput = this.deleteModal.locator('input[type="text"]');
     this.deleteSubmitBtn = this.deleteModal.getByRole('button', { name: 'Delete', exact: true });
   }
 
@@ -36,8 +30,8 @@ export class ProjectPage {
     await this.createProjectBtn.click();
     await this.page.waitForURL('**/projects/create', { waitUntil: 'domcontentloaded' });
 
-    await this.page.getByRole('textbox').fill(projectName);
-    await this.page.getByTestId('create-button').click();
+    await this.projectNameInput.fill(projectName);
+    await this.createFormSubmitBtn.click();
 
     await this.page.waitForURL('**/projects', { waitUntil: 'domcontentloaded' });
     await this.verifyProjectVisible(projectName);
@@ -45,37 +39,23 @@ export class ProjectPage {
 
   async updateProject(updatedName) {
     await this.navigateToProject();
-
     await this.moreActionTrigger.first().click();
     await this.viewUpdateLink.click();
     await this.page.waitForURL('**/projects/*', { waitUntil: 'domcontentloaded' });
-
     await this.moreActionTrigger.first().click();
-    await this.actionMenu.getByText('Update', { exact: true }).click();
-
-    await expect(this.updateModal).toBeVisible();
+    await this.page.getByText('Update', { exact: true }).click();
     await this.projectNameInput.clear();
     await this.projectNameInput.fill(updatedName);
-    await this.submitBtn.click();
+    await this.createFormSubmitBtn.click();
 
     await this.navigateToProject();
     await this.verifyProjectVisible(updatedName);
   }
-
-  async verifyProjectVisible(projectName) {
-    await expect(this.page.getByRole('link', { name: projectName, exact: true })).toBeVisible();
-  }
-
-  async verifyProjectNotVisible(projectName) {
-    await expect(this.page.getByRole('link', { name: projectName, exact: true })).not.toBeVisible();
-  }
-
+  
   async deleteProject(projectName) {
     await this.navigateToProject();
-
     await this.moreActionTrigger.first().click();
     await this.removeOption.click();
-
     await expect(this.deleteModal).toBeVisible();
     await this.deleteConfirmInput.fill(projectName);
 

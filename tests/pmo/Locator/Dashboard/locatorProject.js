@@ -1,14 +1,13 @@
 const locatorProject = {
+  
+  tenancyMenu: 'accordion-menu-tenancy',
+  projectMenu: 'submenu-tenancy-projects-text',
   moreActionTrigger: 'moreaction-icon-trigger',
-  tenancyMenu: 'text=Tenancy',
-  projectMenu: 'submenu-tenancy-projects',
-  createProjectBtn: 'button:has-text("Create")',
-  viewUpdateLink: 'text=View',
-  projectNameInput: 'Name',
-  submitBtn: 'button[type="submit"]',
-  removeOption: 'text=Remove',
-  deleteModal: 'role=dialog[name=/remove|delete/i]',
-  deleteSubmitBtn: 'button:has-text("Delete")',
+  createProjectBtn: 'button-create-options',
+  createFormSubmitBtn: 'create-button',
+  viewUpdateLink: 'project-viewupdate-link',
+  removeOption: 'project-remove-pressable',
+  projectNameInput: 'project-name-textinput',
 };
 
 export default locatorProject;
