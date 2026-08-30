@@ -1,38 +1,19 @@
 const locatorDemo = {
-    // Navigation Selectors
-    computeMenuRole: 'button',
-    computeMenuName: 'Compute',
-    VMMenuRole: 'link',
-    VMMenuName: 'VMs',
-    createVMButtonTestId: 'button-create-options',
-
-    // Distributions Modal Selectors
-    seeAllDisributionButtonRole: 'button',
-    seeAllDisributionButtonName: 'See all',
-    distributionsModalRole: 'dialog',
-    ubuntuRowText: /Ubuntu/i,
-    chooseButtonRole: 'button',
-    chooseButtonName: 'Choose',
-
-    // Plan Modal Selectors
-    choosePlanButtonRole: 'button',
-    choosePlanButtonName: 'Choose a plan',
-    planModalRole: 'dialog',
-    planSaRowText: /s-a/i,
-    confirmPlanButtonRole: 'button',
-    confirmPlanButtonName: 'Choose',
-
-    // VM Detail & Auth Selectors
-    authUsernameRole: 'textbox',
-    authUsernameName: 'Username',
-    passwordTabButtonText: 'Password',
-    authPasswordRole: 'textbox',
-    authPasswordName: 'Password',
-    hostnameInput: 'div',
-    nameInput: 'div',
-
-    // Submit Button
-    submitButtonTestId: 'submit-button',
+  computeMenu: '#accordion-menu-computes',
+  submenuVm: '[data-testid="submenu-computes-vms"]',
+  createVmButton: '[data-testid="button-create-options"]',
+  seeAllDistributionButton: '[data-testid="chooseos-seeall"]',
+  dropdownOption: '[data-testid^="dropdown-listbox-option-"]',
+  chooseButton: '[data-testid="choose-button"]',
+  cpuDropdown: '[data-testid="dropdown-"]',
+  optionX86_64: '[data-testid="dropdown-listbox-option-0"]',
+  optionIntel: '[data-testid="dropdown-listbox-option-0"]',
+  authUsernameInput: '[data-testid="authentication-textinput"]',
+  authPasswordInput: '[data-testid="auth-password-textinput"]',
+  hostnameInput: '[data-testid="choosename-textinput"]',
+  nameInput: '[data-testid="choosename-textinput"]',
+  submitButton: '[data-testid="submit-button"]',
+  tableRow: 'table tbody tr',
 };
 
 export default locatorDemo;

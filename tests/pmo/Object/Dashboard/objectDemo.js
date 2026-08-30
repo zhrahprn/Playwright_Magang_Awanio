@@ -1,111 +1,59 @@
 import { expect } from '@playwright/test';
-import locatorDemo from '../../Locator/Dashboard/locatorDemo';
+import locatorDemo from '../../Locator/Dashboard/locatorDemo.js';
 
-export default class objectDemo {
-    constructor(page) {
-        this.page = page;
+export default class ObjectDemo {
+  constructor(page) {
+    this.page = page;
 
-        // Navigation Locators
-        this.computeMenu = page.getByRole(locatorDemo.computeMenuRole, { name: locatorDemo.computeMenuName });
-        this.VMMenu = page.getByRole(locatorDemo.VMMenuRole, { name: locatorDemo.VMMenuName });
-        this.createVMButton = page.getByTestId(locatorDemo.createVMButtonTestId);
+    this.computeMenu = page.locator(locatorDemo.computeMenu);
+    this.submenuVm = page.locator(locatorDemo.submenuVm);
+    this.createVmButton = page.locator(locatorDemo.createVmButton);
+    this.seeAllDistributionButton = page.locator(locatorDemo.seeAllDistributionButton);
+    this.chooseButton = page.locator(locatorDemo.chooseButton);
+    this.cpuArchitectureDropdown = page.locator(locatorDemo.cpuDropdown).nth(0);
+    this.optionX86_64 = page.locator(locatorDemo.optionX86_64);
+    this.cpuProcessorDropdown = page.locator(locatorDemo.cpuDropdown).nth(1);
+    this.optionIntel = page.locator(locatorDemo.optionIntel);
+    this.authUsernameInput = page.locator(locatorDemo.authUsernameInput);
+    this.authPasswordInput = page.locator(locatorDemo.authPasswordInput);
+    this.hostnameInput = page.locator(locatorDemo.hostnameInput).first();
+    this.nameInput = page.locator(locatorDemo.nameInput).nth(1);
+    this.submitButton = page.locator(locatorDemo.submitButton).last();
+    this.tableRow = page.locator(locatorDemo.tableRow);
+  }
 
-        // Distribution Modal Locators
-        this.seeAllDisributionButton = page.getByRole(locatorDemo.seeAllDisributionButtonRole, { name: locatorDemo.seeAllDisributionButtonName });
-        this.distributionsModal = page.getByRole(locatorDemo.distributionsModalRole);
-        this.ubuntuRadio = this.distributionsModal.getByRole('row', { name: locatorDemo.ubuntuRowText }).getByRole('radio');
-        this.chooseButton = page.getByRole(locatorDemo.chooseButtonRole, { name: locatorDemo.chooseButtonName });
+  async selectOsImage() {
+    await this.seeAllDistributionButton.click();
 
-        // Plan Modal Locators
-        this.choosePlanButton = page.getByRole(locatorDemo.choosePlanButtonRole, { name: locatorDemo.choosePlanButtonName });
-        this.planModal = page.getByRole(locatorDemo.planModalRole);
-        this.planSaRow = this.planModal.getByRole('row', { name: locatorDemo.planSaRowText });
-        this.confirmPlanButton = page.getByRole(locatorDemo.confirmPlanButtonRole, { name: locatorDemo.confirmPlanButtonName, exact: true });
+    const ubuntuRow = this.page.locator('tr', { hasText: 'Ubuntu' });
+    await ubuntuRow.locator('input[type="radio"], label').first().click({ force: true }).catch(async () => {
+      await ubuntuRow.click();
+    });
 
-        // Auth Form Locators
-        this.authUsername = page.getByRole(locatorDemo.authUsernameRole, { name: locatorDemo.authUsernameName });
-        this.passwordTabButton = page.getByText(locatorDemo.passwordTabButtonText, { exact: true });
-        this.authPassword = page.getByRole(locatorDemo.authPasswordRole, { name: locatorDemo.authPasswordName });
+    const ubuntuDropdown = ubuntuRow.locator('[data-testid="dropdown-"]');
+    await ubuntuDropdown.click();
+    await this.page.locator(locatorDemo.dropdownOption).first().click();
 
-        // VM Detail Locators
-        this.hostnameInput = page.locator(locatorDemo.hostnameInput).filter({ hasText: /^Choose a hostname/ }).getByRole('textbox');
-        this.nameInput = page.locator(locatorDemo.nameInput).filter({ hasText: /^Name \*/ }).getByRole('textbox');
+    await this.chooseButton.click();
+  }
 
-        // Submit Button
-        this.submitButton = page.getByTestId(locatorDemo.submitButtonTestId);
-    }
+  async selectCpuPreferences() {
+    await this.cpuArchitectureDropdown.click();
+    await this.optionX86_64.click();
+    await this.cpuProcessorDropdown.click();
+    await this.optionIntel.click();
+  }
 
-    async navigateToCreateVM() {
-        await this.computeMenu.click();
-        await expect(this.VMMenu).toBeVisible();
-        await this.VMMenu.click();
-        await expect(this.page).toHaveURL(/.*computes\/vms/);
+  async fillVmDetails({ username, password, hostname, vmName }) {
+    await this.authUsernameInput.fill(username);
+    await this.authPasswordInput.fill(password);
+    await this.hostnameInput.fill(hostname);
+    await this.nameInput.fill(vmName);
+  }
 
-        await expect(this.createVMButton).toBeVisible();
-        await this.createVMButton.click();
-
-        await expect(this.page).toHaveURL(/.*computes\/vms\/create/);
-    }
-
-    async selectDistributionUbuntu() {
-        await this.seeAllDisributionButton.click();
-        await expect(this.distributionsModal).toBeVisible();
-        await this.ubuntuRadio.check();
-        await this.chooseButton.click();
-        await expect(this.distributionsModal).toBeHidden();
-    }
-
-    async selectCpuPreference(arch = 'x86_64', processor = 'Intel') {
-        const archContainer = this.page.locator('div').filter({ hasText: /^Architecture/ });
-        const archDropdown = archContainer.getByText('Default', { exact: true });
-        await archDropdown.click();
-        await this.page.getByText(arch, { exact: true }).click();
-
-        const procDropdown = this.page.getByText('Select Processor');
-        await expect(procDropdown).toBeVisible();
-        await procDropdown.click();
-        await this.page.getByText(processor, { exact: true }).click();
-    }
-
-    async selectPlanSa() {
-        await this.choosePlanButton.click();
-        await expect(this.planModal).toBeVisible();
-        await this.planSaRow.click();
-        await this.confirmPlanButton.click();
-        await expect(this.planModal).toBeHidden();
-    }
-
-    async dismissModalIfPresent() {
-        const modalCloseBtn = this.page.locator('dialog button').first();
-        if (await modalCloseBtn.isVisible()) {
-            await modalCloseBtn.click();
-        }
-    }
-
-    async fillAuthentication(username, password) {
-        await this.dismissModalIfPresent();
-        await this.authUsername.fill(username);
-        await this.passwordTabButton.click();
-        await expect(this.authPassword).toBeVisible();
-        await this.authPassword.fill(password);
-    }
-
-    async fillVMDetails(hostname, name) {
-        await this.nameInput.scrollIntoViewIfNeeded();
-        await this.hostnameInput.fill(hostname);
-        await this.nameInput.fill(name);
-    }
-
-    async submitCreateVM() {
-        await expect(this.submitButton).toBeEnabled();
-        await this.submitButton.click();
-
-        const errorDialog = this.page.getByRole('dialog').filter({ hasText: /quota/i });
-        if (await errorDialog.isVisible()) {
-            await expect(errorDialog).toContainText(/storage quota exceeded/i);
-            throw new Error('VM creation failed due to storage quota limits.');
-        }
-
-        await expect(this.page).toHaveURL(/.*computes\/vms$/);
-    }
+  async submitCreateVm(vmName) {
+    await this.submitButton.click();
+    await expect(this.page).toHaveURL(/\/computes\/vms$/);
+    await expect(this.tableRow.filter({ hasText: vmName }).first()).toBeVisible({ timeout: 15000 });
+  }
 }

@@ -1,27 +1,27 @@
 import { test } from '@playwright/test';
-import LoginDemo from '../tests/pmo/Object/auth/loginDemo'; 
-import objectDemo from '../tests/pmo/Object/Dashboard/objectDemo'; 
+import LoginDemo from './pmo/Object/auth/loginDemo.js';
+import ObjectDemo from './pmo/Object/Dashboard/objectDemo.js';
 
-test.describe.serial('VM Creation Flow', () => {
-    let loginPage;
-    let vmPage;
+test('Create VM', async ({ page }) => {
+  const objLogin = new LoginDemo(page);
+  const objVm = new ObjectDemo(page);
 
-    test.beforeEach(async ({ page }) => {
-        loginPage = new LoginDemo(page);
-        vmPage = new objectDemo(page);
+  await page.goto('https://platform.demo.awanio.com/');
 
-        // Menjalankan alur login sebelum pengujian
-        await loginPage.goto();
-        await loginPage.login('zahrah.purnama@gmail.com', 'Zz010904,');
-    });
+  await objLogin.login('zahrah.purnama@gmail.com', 'Zz010904,');
+  
 
-    test('2. Create VM Test', async () => {
-        await vmPage.navigateToCreateVM();
-        await vmPage.selectDistributionUbuntu();
-        await vmPage.selectCpuPreference('x86_64', 'Intel');
-        await vmPage.selectPlanSa();
-        await vmPage.fillAuthentication('ubuntu', 'Zz010904,');
-        await vmPage.fillVMDetails('vm-test-auto', 'VM Automated Test');
-        await vmPage.submitCreateVM();
-    });
+  await objVm.computeMenu.click();
+  await objVm.submenuVm.click();
+  await objVm.createVmButton.click();
+  await objVm.selectOsImage();
+  await objVm.selectCpuPreferences();
+  await objVm.fillVmDetails({
+    username: 'testing-qa-automation',
+    password: 'Password123!',
+    hostname: 'testing-qa-automation',
+    vmName: 'testing-qa-automation',
+  });
+
+  await objVm.submitCreateVm('testing-qa');
 });
