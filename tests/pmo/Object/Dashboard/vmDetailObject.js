@@ -33,12 +33,9 @@ export default class VmDetailObject {
 
     async resizeRamAddOne() {
         await this.resizeTab.click();
-
-        // 1. Wait for the RAM input field to become enabled (if VM is upgrading/processing)
         await expect(this.ramInput).toBeEnabled({ timeout: 30000 });
-
-        // 2. Safely extract value and fill new value
         const currentRamVal = await this.ramInput.inputValue();
+        
         const newRamVal = (parseInt(currentRamVal, 10) || 0) + 1;
 
         await this.ramInput.fill(newRamVal.toString());
