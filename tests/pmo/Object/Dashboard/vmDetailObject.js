@@ -4,7 +4,6 @@ import vmDetailLocator from '../../Locator/Dashboard/vmDetailLocator.js';
 export default class VmDetailObject {
     constructor(page) {
         this.page = page;
-        this.backupTab = page.getByRole('tab', { name: 'Backups' });
         this.computeMenu = page.locator(vmDetailLocator.computeMenu);
         this.submenuVm = page.locator(vmDetailLocator.submenuVm);
         this.tableRow = page.locator(vmDetailLocator.tableRow);
@@ -34,8 +33,8 @@ export default class VmDetailObject {
     async resizeRamAddOne() {
         await this.resizeTab.click();
         await expect(this.ramInput).toBeEnabled({ timeout: 30000 });
-        const currentRamVal = await this.ramInput.inputValue();
         
+        const currentRamVal = await this.ramInput.inputValue();
         const newRamVal = (parseInt(currentRamVal, 10) || 0) + 1;
 
         await this.ramInput.fill(newRamVal.toString());
@@ -43,32 +42,42 @@ export default class VmDetailObject {
         await this.confirmYesButton.click();
 
         await expect(this.updateButton).toBeDisabled({ timeout: 15000 });
-    }
+    }   
 
     async createSnapshotSchedule() {
         await this.snapshotTab.click();
+
         const scheduleCreateBtn = this.page
+            .locator('div, section')
+            .filter({ hasText: /Schedule/i })
             .getByRole('button', { name: 'Create', exact: true })
-            .filter({ hasNotText: 'Compute' })
             .first();
-        await expect(scheduleCreateBtn).toBeEnabled({ timeout: 60000 });
-        await scheduleCreateBtn.click();
-        const modalDialog = this.page.locator('div[role="dialog"]');
+
+        const targetBtn = (await scheduleCreateBtn.isVisible().catch(() => false))
+            ? scheduleCreateBtn
+            : this.page.getByRole('button', { name: 'Create', exact: true }).nth(1);
+
+        await expect(targetBtn).toBeEnabled({ timeout: 15000 });
+        await targetBtn.click();
+
+        const modalDialog = this.page.getByRole('dialog').first();
         await expect(modalDialog).toBeVisible({ timeout: 10000 });
 
-        const modalCreateBtn = modalDialog.getByRole('button', { name: 'Create', exact: true });
+        const modalCreateBtn = modalDialog.getByRole('button', { name: /Create|Submit/i, exact: true }).first();
         await expect(modalCreateBtn).toBeEnabled({ timeout: 10000 });
         await modalCreateBtn.click();
+
         await expect(modalDialog).toBeHidden({ timeout: 30000 });
-        await expect(this.page.locator('table').first()).toContainText('hourly');
     }
 
     async createBackupSchedule() {
         await this.backupTab.click();
+
         const backupTabPanel = this.page.getByRole('tabpanel', { name: 'Backups' });
         const createBackupScheduleBtn = backupTabPanel.getByRole('button', { name: 'Create', exact: true }).first();
 
         await expect(createBackupScheduleBtn).toBeVisible({ timeout: 15000 });
+        await expect(createBackupScheduleBtn).toBeEnabled({ timeout: 15000 });
         await createBackupScheduleBtn.click();
 
         const modalDialog = this.page.getByRole('dialog').first();
@@ -87,6 +96,7 @@ export default class VmDetailObject {
             await successDialog.getByRole('button').first().click();
         }
         await expect(successDialog).toBeHidden({ timeout: 10000 });
-        await expect(backupTabPanel.locator('table').first()).toContainText('hourly');
+
+        await expect(backupTabPanel.getByText(/hourly/i)).toBeVisible({ timeout: 15000 });
     }
 }

@@ -1,5 +1,4 @@
 const locatorProject = {
-  
   tenancyMenu: 'accordion-menu-tenancy',
   projectMenu: 'submenu-tenancy-projects-text',
   moreActionTrigger: 'moreaction-icon-trigger',
