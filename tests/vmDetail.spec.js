@@ -5,7 +5,7 @@ import VmDetailObject from './pmo/Object/Dashboard/vmDetailObject.js';
 test.describe.serial('VM Operations Flow', () => {
     let page;
     let objVmDetail;
-    const vmName = 'testing-qa';
+    let selectedVmName = ''; // Tempat menyimpan nama VM yang diambil secara dinamis
     
     test.beforeAll(async ({ browser }) => {
         page = await browser.newPage();
@@ -13,10 +13,21 @@ test.describe.serial('VM Operations Flow', () => {
         objVmDetail = new VmDetailObject(page);
 
         await page.goto('https://platform.demo.awanio.com/');
+
+        // Bersihkan Cookies & Storage agar filter project bekas test sebelumnya hilang
+        await page.context().clearCookies();
+        await page.evaluate(() => {
+            window.localStorage.clear();
+            window.sessionStorage.clear();
+        }).catch(() => {});
+
         await objLogin.login('zahrah.purnama@gmail.com', 'Zz010904,');
         
         await objVmDetail.navigateToVmMenu();
-        await objVmDetail.openVmDetailByName(vmName);
+        
+        // Ambil baris paling atas & baca nama VM secara dinamis tanpa hardcode
+        selectedVmName = await objVmDetail.openFirstVmDetail();
+        console.log(`Menjalankan pengujian untuk VM: ${selectedVmName}`);
     });
 
     test.afterAll(async () => {

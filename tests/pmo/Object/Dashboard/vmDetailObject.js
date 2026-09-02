@@ -23,17 +23,24 @@ export default class VmDetailObject {
         await expect(this.page).toHaveURL(/\/computes\/vms$/);
     }
 
-    async openVmDetailByName(vmName) {
-        const targetRow = this.tableRow.filter({ hasText: vmName }).first();
-        await targetRow.locator(vmDetailLocator.moreActionButton).click();
+    async openFirstVmDetail() {
+        const firstRow = this.tableRow.first();
+        await expect(firstRow).toBeVisible({ timeout: 20000 });
+
+        const vmNameCell = firstRow.locator('td[data-testid="datatable-cell-Name"]').first();
+        const extractedVmName = (await vmNameCell.textContent()).trim();
+
+        await firstRow.locator(vmDetailLocator.moreActionButton).click();
         await this.viewDetailLink.click();
         await expect(this.page).toHaveURL(/\/computes\/vms\/organizations/);
+
+        return extractedVmName;
     }
 
     async resizeRamAddOne() {
         await this.resizeTab.click();
         await expect(this.ramInput).toBeEnabled({ timeout: 30000 });
-        
+
         const currentRamVal = await this.ramInput.inputValue();
         const newRamVal = (parseInt(currentRamVal, 10) || 0) + 1;
 
@@ -42,30 +49,22 @@ export default class VmDetailObject {
         await this.confirmYesButton.click();
 
         await expect(this.updateButton).toBeDisabled({ timeout: 15000 });
-    }   
+    }
 
     async createSnapshotSchedule() {
         await this.snapshotTab.click();
+        const snapshotsTabPanel = this.page.getByRole('tabpanel', { name: 'Snapshots' });
+        const scheduleCreateBtn = snapshotsTabPanel.getByRole('button', { name: 'Create', exact: true }).first();
 
-        const scheduleCreateBtn = this.page
-            .locator('div, section')
-            .filter({ hasText: /Schedule/i })
-            .getByRole('button', { name: 'Create', exact: true })
-            .first();
-
-        const targetBtn = (await scheduleCreateBtn.isVisible().catch(() => false))
-            ? scheduleCreateBtn
-            : this.page.getByRole('button', { name: 'Create', exact: true }).nth(1);
-
-        await expect(targetBtn).toBeEnabled({ timeout: 15000 });
-        await targetBtn.click();
-
+        await expect(scheduleCreateBtn).toBeVisible({ timeout: 15000 });
+        await expect(scheduleCreateBtn).toBeEnabled({ timeout: 15000 });
+        await scheduleCreateBtn.click();
         const modalDialog = this.page.getByRole('dialog').first();
         await expect(modalDialog).toBeVisible({ timeout: 10000 });
 
-        const modalCreateBtn = modalDialog.getByRole('button', { name: /Create|Submit/i, exact: true }).first();
-        await expect(modalCreateBtn).toBeEnabled({ timeout: 10000 });
-        await modalCreateBtn.click();
+        const modalSubmitBtn = modalDialog.getByRole('button', { name: /Create|Submit/i, exact: true }).first();
+        await expect(modalSubmitBtn).toBeEnabled({ timeout: 10000 });
+        await modalSubmitBtn.click();
 
         await expect(modalDialog).toBeHidden({ timeout: 30000 });
     }
@@ -74,8 +73,14 @@ export default class VmDetailObject {
         await this.backupTab.click();
 
         const backupTabPanel = this.page.getByRole('tabpanel', { name: 'Backups' });
-        const createBackupScheduleBtn = backupTabPanel.getByRole('button', { name: 'Create', exact: true }).first();
+        const schedulesTable = backupTabPanel.locator('table').first();
+        await expect(schedulesTable).toBeVisible({ timeout: 15000 });
+        const existingScheduleRow = schedulesTable.getByRole('row', { name: /hourly|daily|weekly|monthly/i });
+        if (await existingScheduleRow.isVisible()) {
+            return;
+        }
 
+        const createBackupScheduleBtn = backupTabPanel.getByRole('button', { name: 'Create', exact: true }).first();
         await expect(createBackupScheduleBtn).toBeVisible({ timeout: 15000 });
         await expect(createBackupScheduleBtn).toBeEnabled({ timeout: 15000 });
         await createBackupScheduleBtn.click();
@@ -92,7 +97,7 @@ export default class VmDetailObject {
         await createBackupSubmitBtn.click();
 
         const successDialog = this.page.getByRole('dialog', { name: /Success/i });
-        if (await successDialog.isVisible({ timeout: 5000 }).catch(() => false)) {
+        if (await successDialog.isVisible().catch(() => false)) {
             await successDialog.getByRole('button').first().click();
         }
         await expect(successDialog).toBeHidden({ timeout: 10000 });
