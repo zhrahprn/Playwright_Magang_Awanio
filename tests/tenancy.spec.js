@@ -2,7 +2,7 @@ import { test } from '@playwright/test';
 import LoginDemo from './pmo/Object/auth/loginDemo.js';
 import ProjectPage from './pmo/Object/Dashboard/objectProject.js';
 
-test.describe.serial('CRUD Project Tenancy Flow', () => {
+test.describe.serial('CRUD Tenancy', () => {
   let loginPage;
   let projectPage;
   let createdProjectName = '';

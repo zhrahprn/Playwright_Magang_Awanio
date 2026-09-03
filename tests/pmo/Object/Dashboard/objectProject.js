@@ -59,24 +59,22 @@ export default class ProjectPage {
     return projectName;
   }
 
-  async updateProject() {
+ async updateProject() {
     await this.navigateToProject();
-
-    // 1. Ambil nama project pertama di list
     const firstProjectLink = this.page.locator('main span.font-medium.text-primary, main a[href*="/projects/"]').first();
     await firstProjectLink.waitFor({ state: 'visible' });
     const currentName = (await firstProjectLink.textContent()).trim();
     const updatedName = `${currentName}-updated`;
-
-    // 2. Masuk ke halaman detail project
     await this.moreActionTrigger.first().click();
     await this.viewUpdateLink.click();
     await this.page.waitForURL('**/projects/*', { waitUntil: 'domcontentloaded' });
     await this.moreActionTrigger.first().click();
     await this.page.locator('div[role="dialog"]').getByText('Update', { exact: true }).click();
     await this.projectNameInput.fill(updatedName);
-    await this.createFormSubmitBtn.click();
-    await expect(this.page.getByText(updatedName)).toBeVisible();
+    const submitModalBtn = this.page.locator('div[role="dialog"]').getByRole('button', { name: /update|save|create/i });
+    await submitModalBtn.click();
+    await expect(this.page.locator('main').getByText(updatedName)).toBeVisible();
+
     return updatedName;
   }
 
