@@ -36,7 +36,7 @@ export default class ProjectPage {
       const isExist = existingTexts.some(text => text.trim() === targetName);
 
       if (!isExist) {
-        return targetName; 
+        return targetName;
       }
     }
 
@@ -59,7 +59,7 @@ export default class ProjectPage {
     return projectName;
   }
 
- async updateProject() {
+  async updateProject() {
     await this.navigateToProject();
     const firstProjectLink = this.page.locator('main span.font-medium.text-primary, main a[href*="/projects/"]').first();
     await firstProjectLink.waitFor({ state: 'visible' });
@@ -77,26 +77,21 @@ export default class ProjectPage {
 
     return updatedName;
   }
-
+  
   async deleteProject() {
     await this.navigateToProject();
-
     await this.moreActionTrigger.first().click();
-    await this.removeOption.click();
-    await expect(this.deleteModal).toBeVisible();
+    await this.page.locator('div[role="dialog"]').getByText('Remove', { exact: true }).click();
 
     await this.deleteProjectNameLabel.waitFor({ state: 'visible' });
-    const extractedProjectName = await this.deleteProjectNameLabel.textContent();
-    const cleanProjectName = extractedProjectName ? extractedProjectName.trim() : '';
+    const cleanProjectName = (await this.deleteProjectNameLabel.textContent()).trim();
 
-    await this.deleteConfirmInput.focus();
-    await this.deleteConfirmInput.clear();
-    await this.deleteConfirmInput.pressSequentially(cleanProjectName, { delay: 50 });
-
+    await this.deleteConfirmInput.fill(cleanProjectName);
     await expect(this.deleteSubmitBtn).toBeEnabled();
     await this.deleteSubmitBtn.click();
 
-    await expect(this.deleteModal).toBeHidden();
+    await expect(this.page.getByText(cleanProjectName)).toBeHidden();
+
     return cleanProjectName;
   }
 
