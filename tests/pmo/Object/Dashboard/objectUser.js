@@ -36,11 +36,9 @@ export default class UserPage {
    async generateDynamicUserName(prefix = 'testing') {
     const numberWords = ['satu', 'dua', 'tiga', 'empat', 'lima', 'enam', 'tujuh', 'delapan', 'sembilan', 'sepuluh'];
 
-    // Ensure main layout is loaded
     const mainContainer = this.page.locator('main');
     await mainContainer.waitFor({ state: 'visible' });
 
-    // Extract inner texts across matching elements
     const contentTexts = await mainContainer.allInnerTexts();
     const fullText = contentTexts.join(' ');
 
